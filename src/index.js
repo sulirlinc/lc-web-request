@@ -28,7 +28,7 @@ const requestByCache = ({ config, request, urls }) => {
   if (timeoutUrl[md]) {
     if (!timeoutUrl[md].data) {
       return new Promise((resolve, reject) => {
-        reject('正在加载数据，请等待！！')
+        reject({ code: '1003', message: '正在加载数据，请等待！！' })
       })
     } else {
       delete timeoutUrl[md]
@@ -52,16 +52,14 @@ module.exports = ({
   baseURL,
   timeout = 5000,
   tokenKey = 'Authorization',
-  urls,
+  cacheUrls,
+  requestInterceptor = () => {},
   getToken = () => {
   }
 }) => {
   const request = axios.create({ baseURL, timeout })
-  request.interceptors.request.use(({
-    checked = () => {
-    }, ...config
-  }) => {
-    checked()
+  request.interceptors.request.use(({ ...config }) => {
+    requestInterceptor(config)
     config.headers[tokenKey] = getToken()
     return config
   }, error => {
@@ -74,7 +72,6 @@ module.exports = ({
         if (!error.response) {
           rejectObject.message = '网络异常，请稍后刷新重试！'
           rejectObject.code = '1001'
-
         } else if (error.response.status === 401 || error.response.status
             === 403) {
           rejectObject.message = '无权访问！'
@@ -95,8 +92,9 @@ module.exports = ({
   return {
     request,
     finds(config) {
-      if (urls) {
-        return requestByCache({ config, request, urls })
+      if (cacheUrls) {
+        return requestByCache(
+            { config: { ...config, method: 'get' }, request, urls: cacheUrls })
       } else {
         return request(config)
       }
