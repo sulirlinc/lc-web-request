@@ -76,12 +76,8 @@ const saveData = (config) => {
 const expires = () => {
   const storage = getStorage()
   for (const key in storage) {
-    const item = storage.getItem(key)
-    if (!item) {
-      continue
-    }
-    const cache = JSON.parse(item)
-    if (!cache.persistent && cache.expires < new Date().getTime()) {
+    const cache = JSON.parse(storage.getItem(key))
+    if (cache && !cache.persistent && cache.expires < new Date().getTime()) {
       getStorage().removeItem(key)
     }
   }
@@ -107,6 +103,13 @@ const getData = (key, callback) => {
 }
 module.exports = () => {
   setInterval(expires, LocalTimeUnit.MINUTES)
-  return { saveData, getData, saveStartTime, removeItem }
+  return {
+    saveData,
+    getData,
+    saveStartTime,
+    removeItem,
+    LocalTimeUnit,
+    TimeUnit
+  }
 }
 

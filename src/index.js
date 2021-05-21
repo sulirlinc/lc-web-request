@@ -1,10 +1,14 @@
 const axios = require('axios')
 const md5 = require('js-md5')
-const { saveData, saveStartTime, getData } = require('./cache')()
-
+const { saveData, saveStartTime, getData, removeItem,
+  TimeUnit, LocalTimeUnit
+} = require('./cache')()
+export {
+  getData as getCacheData , saveData as saveCacheData, removeItem as removeCacheItem, LocalTimeUnit, TimeUnit
+}
 const timeoutUrl = {}
 
-export function saveCacheByUrl(value, data, urls) {
+const saveCacheByUrl = (value, data, urls) => {
   const url = value.url || value
   const config = urls[url] || {}
   if (config) {
@@ -14,8 +18,7 @@ export function saveCacheByUrl(value, data, urls) {
     saveData(config)
   }
 }
-
-export function getCacheByUrl(value, urls) {
+const getCacheByUrl = (value, urls) => {
   const config = urls[value.url] || {}
   if (config) {
     const data = getData(md5(JSON.stringify(value)))
@@ -48,16 +51,20 @@ const requestByCache = ({ config, request, urls }) => {
   }).catch(() => delete timeoutUrl[md])
 }
 
-module.exports = ({
+export default ({
   baseURL,
   timeout = 5000,
   tokenKey = 'Authorization',
   cacheUrls,
+  responseInterceptor = {
+
+  },
   requestInterceptor = () => {},
   getToken = () => {
-  }
+  },
+  ...config
 }) => {
-  const request = axios.create({ baseURL, timeout })
+  const request = axios.create({ baseURL, timeout, ...config })
   request.interceptors.request.use(({ ...config }) => {
     requestInterceptor(config)
     config.headers[tokenKey] = getToken()
@@ -65,30 +72,35 @@ module.exports = ({
   }, error => {
     throw error
   })
-  request.interceptors.response.use(
-      response => response,
-      error => {
-        const rejectObject = { error, type: 'error', message: '未定义的错误。' }
-        if (!error.response) {
-          rejectObject.message = '网络异常，请稍后刷新重试！'
-          rejectObject.code = '1001'
-        } else if (error.response.status === 401 || error.response.status
-            === 403) {
-          rejectObject.message = '无权访问！'
-          rejectObject.code = '1002'
-          rejectObject.type = 'low.power'
-        } else {
-          if (error.response.status === 502) {
-            rejectObject.message = '网络繁忙，请稍候重试！'
-          } else if (error.response && error.response.data
-              && error.response.data.message) {
-            rejectObject.message = error.response.data.message
-          } else if (error.message) {
-            rejectObject.message = error.message
+  if (responseInterceptor.response && responseInterceptor.error) {
+    request.interceptors.response.use(responseInterceptor.response,
+        responseInterceptor.error)
+  } else {
+    request.interceptors.response.use(
+        response => response,
+        error => {
+          const rejectObject = { error, type: 'error', message: '未定义的错误。' }
+          if (!error.response) {
+            rejectObject.message = '网络异常，请稍后刷新重试！'
+            rejectObject.code = '1001'
+          } else if (error.response.status === 401 || error.response.status
+              === 403) {
+            rejectObject.message = '无权访问！'
+            rejectObject.code = '1002'
+            rejectObject.type = 'low.power'
+          } else {
+            if (error.response.status === 502) {
+              rejectObject.message = '网络繁忙，请稍候重试！'
+            } else if (error.response && error.response.data
+                && error.response.data.message) {
+              rejectObject.message = error.response.data.message
+            } else if (error.message) {
+              rejectObject.message = error.message
+            }
           }
-        }
-        return Promise.reject(rejectObject)
-      })
+          return Promise.reject(rejectObject)
+        })
+  }
   return {
     request,
     finds(config) {
@@ -122,8 +134,6 @@ module.exports = ({
         ...config,
         method: 'get'
       })
-    },
-    getCacheData: getData,
-    saveCacheData: saveData
+    }
   }
 }
