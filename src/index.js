@@ -56,6 +56,7 @@ export default ({
   timeout = 5000,
   tokenKey = 'Authorization',
   cacheUrls,
+  statusCodeMapping,
   responseInterceptor = {
 
   },
@@ -73,8 +74,7 @@ export default ({
     throw error
   })
   if (responseInterceptor.response && responseInterceptor.error) {
-    request.interceptors.response.use(responseInterceptor.response,
-        responseInterceptor.error)
+    request.interceptors.response.use(responseInterceptor.response, responseInterceptor.error)
   } else {
     request.interceptors.response.use(
         response => response,
@@ -97,6 +97,10 @@ export default ({
             } else if (error.message) {
               rejectObject.message = error.message
             }
+          }
+          if (statusCodeMapping && error.response && error.response.data
+              && statusCodeMapping[error.response.data.status]) {
+            statusCodeMapping[`${error.response.data.status}`](error.response.data)
           }
           return Promise.reject(rejectObject)
         })
