@@ -116,25 +116,25 @@ export default ({
       }
     },
     post(config) {
-      request({
+      return request({
         ...config,
         method: 'post'
       })
     },
     put(config) {
-      request({
+      return request({
         ...config,
         method: 'put'
       })
     },
     del(config) {
-      request({
+      return request({
         ...config,
         method: 'delete'
       })
     },
     get(config) {
-      request({
+      return request({
         ...config,
         method: 'get'
       })

@@ -23,6 +23,12 @@ const cacheUrls = {
 export const lwr = LcWebRequest({
   baseURL: process.env.BASE_API,
   cacheUrls,
+  statusCodeMapping: {
+    '10005': (data) => {
+      alert('这里可以做一些事。')
+     // 当服务器返回异常时，data = { status:10005 } , 那么就会进到这个事件里面。
+    }
+  },
   requestInterceptor: (config) => {
     // 拦截。
     config.headers['Accept-Language'] = tranLanguage[store.getters.language]
