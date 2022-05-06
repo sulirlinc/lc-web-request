@@ -26,7 +26,10 @@ const getCacheByUrl = (value, urls) => {
   }
 }
 
-const requestByCache = ({ config, request, urls }) => {
+const requestByCache = ({ config, request, urls, args = { unDoCache: false } }) => {
+  if (args.unDoCache) {
+    return request(config)
+  }
   const md = md5(JSON.stringify(config))
   if (timeoutUrl[md]) {
     if (!timeoutUrl[md].data) {
@@ -107,10 +110,10 @@ export default ({
   }
   return {
     request,
-    finds(config) {
+    finds(config, args = {}) {
       if (cacheUrls) {
         return requestByCache(
-            { config: { ...config, method: 'get' }, request, urls: cacheUrls })
+            { config: { ...config, method: 'get' }, request, urls: cacheUrls, args })
       } else {
         return request(config)
       }
