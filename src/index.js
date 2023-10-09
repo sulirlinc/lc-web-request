@@ -1,8 +1,10 @@
-const axios = require('axios')
-const md5 = require('js-md5')
+import md5 from 'crypto-js/md5';
+import axios from 'axios';
+import cache from './cache'
+
 const { saveData, saveStartTime, getData, removeItem,
   TimeUnit, LocalTimeUnit
-} = require('./cache')()
+} = cache()
 export {
   getData as getCacheData , saveData as saveCacheData, removeItem as removeCacheItem, LocalTimeUnit, TimeUnit
 }
@@ -13,7 +15,7 @@ const saveCacheByUrl = (value, data, urls) => {
   const config = urls[url] || {}
   if (config) {
     config.url = url
-    config.key = md5(JSON.stringify(value))
+    config.key = md5(JSON.stringify(value)).toString()
     config.data = { data }
     saveData(config)
   }
@@ -21,7 +23,7 @@ const saveCacheByUrl = (value, data, urls) => {
 const getCacheByUrl = (value, urls) => {
   const config = urls[value.url] || {}
   if (config) {
-    const data = getData(md5(JSON.stringify(value)))
+    const data = getData(md5(JSON.stringify(value)).toString())
     return data
   }
 }
@@ -30,7 +32,7 @@ const requestByCache = ({ config, request, urls, args = { unDoCache: false } }) 
   if (args.unDoCache) {
     return request(config)
   }
-  const md = md5(JSON.stringify(config))
+  const md = md5(JSON.stringify(config)).toString()
   if (timeoutUrl[md]) {
     if (!timeoutUrl[md].data) {
       return new Promise((resolve, reject) => {

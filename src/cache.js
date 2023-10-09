@@ -1,5 +1,4 @@
-const md5 = require('js-md5')
-
+import md5 from 'crypto-js/md5';
 const localData = {
   data: {},
   setItem: function (key, value) {
@@ -17,7 +16,7 @@ const localData = {
 }
 
 const getStorage = () => {
-  if (!window.localStorage) {
+  if (!window || !window.localStorage) {
     return localData
   } else {
     return window.localStorage
@@ -42,7 +41,7 @@ const removeItem = (key) => {
   if (typeof key !== 'string') {
     key = JSON.stringify(key)
   }
-  getStorage().removeItem(md5(key))
+  getStorage().removeItem(md5(key).toString())
 }
 
 const saveStartTime = (startTime) => {
@@ -101,7 +100,7 @@ const getData = (key, callback) => {
     getStorage().removeItem(key)
   }
 }
-module.exports = () => {
+const cache = () => {
   setInterval(expires, LocalTimeUnit.MINUTES)
   return {
     saveData,
@@ -112,4 +111,5 @@ module.exports = () => {
     TimeUnit
   }
 }
+export default cache
 

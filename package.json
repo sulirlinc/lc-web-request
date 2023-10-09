@@ -1,6 +1,6 @@
 {
   "name": "lc-web-request",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "description": "web请求服务器工具，避免重复请求，一段时间内的数据缓存在浏览器中。",
   "main": "dist/index.js",
   "scripts": {
@@ -18,9 +18,9 @@
     "axios"
   ],
   "dependencies": {
+    "@babel/core": "^7.14.3",
     "axios": "^0.21.1",
-    "js-md5": "^0.7.3",
-    "@babel/core": "^7.14.3"
+    "crypto-js": "^4.1.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.14.3",
