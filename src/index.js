@@ -1,10 +1,8 @@
 import md5 from 'crypto-js/md5';
 import axios from 'axios';
-import cache from './cache'
+import { cache } from './cache'
 
-const { saveData, saveStartTime, getData, removeItem,
-  TimeUnit, LocalTimeUnit
-} = cache()
+const { saveData, saveStartTime, getData, removeItem, TimeUnit, LocalTimeUnit } = cache()
 export {
   getData as getCacheData , saveData as saveCacheData, removeItem as removeCacheItem, LocalTimeUnit, TimeUnit
 }

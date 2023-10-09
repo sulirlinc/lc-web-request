@@ -100,7 +100,7 @@ const getData = (key, callback) => {
     getStorage().removeItem(key)
   }
 }
-const cache = () => {
+export const cache = () => {
   setInterval(expires, LocalTimeUnit.MINUTES)
   return {
     saveData,
