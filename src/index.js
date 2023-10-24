@@ -72,6 +72,7 @@ export default ({
   request.interceptors.request.use(({ ...config }) => {
     requestInterceptor(config)
     config.headers[tokenKey] = getToken()
+    request.headers = config.headers
     return config
   }, error => {
     throw error

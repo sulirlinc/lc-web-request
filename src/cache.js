@@ -74,7 +74,8 @@ const saveData = (config) => {
 
 const expires = () => {
   const storage = getStorage()
-  for (const key in storage) {
+  const data = storage.data || storage;
+  for (const key in data) {
     const cache = JSON.parse(storage.getItem(key))
     if (cache && !cache.persistent && cache.expires < new Date().getTime()) {
       getStorage().removeItem(key)
@@ -101,7 +102,9 @@ const getData = (key, callback) => {
   }
 }
 export const cache = () => {
-  setInterval(expires, LocalTimeUnit.MINUTES)
+  if (window) {
+    setInterval(expires, LocalTimeUnit.MINUTES)
+  }
   return {
     saveData,
     getData,
